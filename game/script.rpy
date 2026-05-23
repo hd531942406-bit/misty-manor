@@ -8,6 +8,10 @@
 define narrator = Character(None, what_color="#d4c4a0", what_size=28)
 define n = Character(None, what_color="#d4c4a0", what_size=28)
 
+define detective = Character("侦探", color="#c8b897")
+define butler_char = Character("管家", color="#8a7b6b")
+define girl_char = Character("若兰", color="#d4a853")
+
 # ═══════════════════════════════════════
 # 背景图
 # ═══════════════════════════════════════
@@ -180,6 +184,10 @@ label hall:
             "你在雨伞架底部发现了一枚玉坠，触手温润，上面刻着奇怪的纹路。"
             call check_collector_achievement
             jump hall_choices
+        "上楼去卧室看看" if state.has_flag('hall_explored') and not state.has_flag('visited_bedroom'):
+            jump master_bedroom
+        "前往餐厅" if (state.visited('library') > 0 or state.visited('study') > 0) and not state.has_flag('visited_dining'):
+            jump dining_hall
         "从正门离开庄园" if state.has_flag('entered_via_door') and state.visited('hall') >= 2:
             jump ending_escape
 
@@ -237,6 +245,56 @@ label butler_encounter:
     管家没有回答。他的嘴角似乎动了一下——也许是微笑，也许是肌肉的痉挛。然后他离开了，脚步声被地毯吸收得干干净净。
 
     {color=#8a7b6b}你注意到他刚才站的位置——窗台上，灰尘里有他指尖划出的痕迹，隐约是一个圆形。{/color}
+    """
+
+    jump hall_choices
+
+# ═══════════════════════════════════════
+# 二楼卧室（新场景）
+# ═══════════════════════════════════════
+
+label master_bedroom:
+    $ state.set_flag('visited_bedroom')
+    scene bg dark
+    with dissolve
+
+    """
+    你沿着大厅后方的楼梯走上二楼。木质楼梯在你脚下发出吱嘎的呻吟，每一声都像是整座庄园在你耳边低语。
+
+    推开走廊尽头那扇半掩的门，你走进了庄园主人的卧室。房间不大，布置也很朴素——一张铁架床、一个衣柜、一张小书桌。{color=#8a7b6b}这里更像是苦行僧的住处，而不是拥有整座庄园的人的卧房。{/color}
+
+    床铺整齐得近乎刻意——被角折成直角，枕头端正地放在正中央。床单上没有一丝褶皱。{color=#8a7b6b}不像是有人睡过的样子——更像是最后一次整理后就再也没有人碰过。{/color}
+
+    桌上放着一个相框。你走近一看——照片上是一个年轻女人，怀里抱着一个婴儿。照片背面写着：「吾妻婉如，小女若兰，摄于建庄五年。」{color=#d4a853}原来温室的女孩叫若兰。{/color}
+
+    你拉开抽屉，里面只有一个文件夹，标签上写着：「守护者传承：第一代至第四代记录。」你翻开第一页，密密麻麻的手写笔记记载着顾北川以来每一位庄园主人的生平和死因。
+
+    {color=#8a7b6b}每一代的结语都一样：「自愿入阵，以血为约。门已闭，雾已散。」{/color}
+    """
+
+    jump hall_choices
+
+# ═══════════════════════════════════════
+# 餐厅（新场景）
+# ═══════════════════════════════════════
+
+label dining_hall:
+    $ state.set_flag('visited_dining')
+    scene bg dark
+    with dissolve
+
+    """
+    你推开餐厅的双开弹簧门，走进一个可以容纳二十人用餐的宽敞空间。
+
+    长桌中央放着一排银烛台，蜡烛早已燃尽，只剩下凝固的蜡泪。{color=#8a7b6b}桌上摆着六套餐具——但只有主位的那一套有使用过的痕迹。{/color}
+
+    其他位置的餐具落满了灰尘，银器已经氧化发黑。显然这个庄园很久没有招待过客人了。但李柘远仍然每晚坐在主位上，独自用餐。
+
+    墙壁上挂着一幅褪色的油画——画中是一个繁花盛开的花园，与现在的荒芜花园形成鲜明的对比。油画下方有一张小型供桌，桌上供着五张泛黄的照片。{color=#8a7b6b}每一张照片上的面孔都不一样，男女老少都有，但他们的眼神都带着同一种神色——不是恐惧，而是释然。{/color}
+
+    供桌上放着一本烫金封面的册子，扉页上写着：「历代守护者名录。」你翻开最后一页——第六行是空的，第七行也是。{color=#c8b897}李柘远是第五代。{/color}
+
+    册子里夹着一张手写字条：「吾之后来者，此非诅咒，乃天命也。庄园之下，万灵之枢。一代一人，方得其安。」落款处写着：「第四代守护者——秦一鹤。」
     """
 
     jump hall_choices
@@ -463,6 +521,8 @@ label garden:
             jump garden_path
         "再次去温室找那个女孩" if state.has_flag('girl_gone') and not state.has_flag('girl_deep'):
             jump greenhouse_return
+        "向若兰告别" if state.has_flag('girl_deep') and not state.has_flag('girl_farewell') and state.has_item('cellar_key'):
+            jump girl_farewell
         "返回大厅":
             jump hall
 
@@ -632,6 +692,54 @@ label greenhouse_return:
     jump garden
 
 # ═══════════════════════════════════════
+# 女孩告别（新场景）
+# ═══════════════════════════════════════
+
+label girl_farewell:
+    $ state.set_flag('girl_farewell')
+    scene bg greenhouse
+    show firefly
+    with dissolve
+
+    show char girl at center_stand
+    with dissolve
+
+    """
+    你最后一次走进温室。若兰站在月光中，似乎一直在等你。
+
+    {color=#d4a853}「你拿到了钥匙。」{/color} 她看着你的手。{color=#d4a853}「也拿到了日记。还有玉坠。你准备好了。」{/color}
+
+    """
+
+    girl_char "「我父亲下去之前，最后做了一件事——他站在这里，看着月光穿过碎玻璃落在我的脸上。」"
+
+    """
+    她的声音轻得像是雾气。
+
+    """
+
+    girl_char "「然后他说：『若兰，如果我成功了，这座庄园就会自由。如果我没有——下一个来的人会是一个侦探。告诉他——他只有一个机会。必须把玉坠放在阵眼，然后把所有符文倒过来读。那是封闭法阵的唯一方法。』」"
+
+    """
+
+    你默默记下了这句话。{color=#8a7b6b}所有符文倒过来读。{/color}
+
+    """
+
+    girl_char "「还有——」 她的眼睛突然湿润了。「如果你成功了，我会走出去。如果你失败了——请让下一个人知道，我叫若兰。我已经等了五年了。」"
+
+    """
+
+    你点了点头。没有说出任何承诺。你知道——如果失败了，可能再没有下一个人了。
+
+    你转身走向宅邸，手中握着地窖钥匙，口袋里装着玉坠和日记。今晚的月亮格外明亮，像是有人在上面点了一盏灯。
+    """
+
+    hide char girl
+    hide firefly
+    jump garden
+
+# ═══════════════════════════════════════
 # 地下室
 # ═══════════════════════════════════════
 
@@ -652,9 +760,38 @@ label basement:
         "用地窖钥匙打开铁门":
             $ state.set_flag('opened_cellar')
             "钥匙插入锁孔——它转动得异常顺畅，仿佛昨天才被使用过。铁门发出一声沉闷的响声，缓缓打开。\n\n一股潮湿的、带着泥土气息的风从门内涌出。{color=#8a7b6b}那风中夹杂着一种你无法形容的气味——不是腐烂，更像是时间和空间本身在朽坏。{/color}"
+
+            if state.has_flag('butler_spoke') and not state.has_flag('butler_warned'):
+                jump butler_warning
+
             jump basement_corridor
         "返回大厅":
             jump hall
+
+# ═══════════════════════════════════════
+# 管家警告（新场景）
+# ═══════════════════════════════════════
+
+label butler_warning:
+    $ state.set_flag('butler_warned')
+
+    """
+    你正要踏入铁门，身后传来一个沙哑的声音。
+
+    {color=#c8b897}「你确定要下去？」{/color}
+
+    管家不知何时出现在走廊里。他依旧面无表情，但那双浑浊的眼睛里似乎多了一丝什么——{color=#8a7b6b}也许是关切，也许只是好奇。{/color}
+
+    butler_char "「我已经送走四代人了。顾北川是新郎官走进去的。第二代是半夜自己下去的。第三代写了一封遗书，放在你现在踩着的这块石板下面。秦一鹤跟我喝完了一整瓶酒。李柘远——他什么也没说，只是看了若兰一眼。」"
+
+    {color=#c8b897}「你是第六个。可能也是最后一个。」{/color}
+
+    他往后退了一步，半个身子隐没在走廊的阴影中。{color=#8a7b6b}「如果你回不来——我会把灯关掉的。」{/color}
+
+    然后他转身走进了黑暗。脚步声逐渐远去，直到完全被地底传来的那种低沉震动所吞没。
+    """
+
+    jump basement_corridor
 
 label basement_corridor:
     $ state.visit('basement_corridor')
@@ -963,13 +1100,16 @@ label ending_master:
 label game_end:
 
     python:
-        all_scenes = ['hall', 'library', 'bookshelf', 'read_book', 'library_search',
+        all_scenes = ['hall', 'hall_explore', 'butler_encounter',
+                      'master_bedroom', 'dining_hall',
+                      'library', 'bookshelf', 'read_book', 'library_search',
                       'study', 'desk', 'portrait', 'cipher_decode',
                       'garden', 'fountain', 'garden_path',
-                      'greenhouse', 'greenhouse_talk', 'greenhouse_promise', 'greenhouse_return',
-                      'basement', 'basement_corridor', 'basement_fear', 'basement_wall',
-                      'ritual_room', 'ritual_vision',
-                      'hall_explore', 'butler_encounter']
+                      'greenhouse', 'greenhouse_talk', 'greenhouse_promise',
+                      'greenhouse_return', 'girl_farewell',
+                      'basement', 'basement_corridor', 'basement_fear',
+                      'basement_wall', 'butler_warning',
+                      'ritual_room', 'ritual_vision']
         visited_all = all(state.visited(s) > 0 for s in all_scenes)
         if visited_all:
             grant_achievement("explorer")

@@ -1,0 +1,24 @@
+﻿I'm sorry, but an uncaught exception occurred.
+
+While running game code:
+  File "game/script.rpy", line 599, in script
+    detective "「为什么不离开？」"
+Exception: Sayer 'detective' is not defined.
+
+-- Full Traceback ------------------------------------------------------------
+
+Full traceback:
+  File "game/script.rpy", line 599, in script
+    detective "「为什么不离开？」"
+  File "C:\Users\Administrator\AppData\Local\Microsoft\WinGet\Packages\RenPy.RenPySDK_Microsoft.Winget.Source_8wekyb3d8bbwe\renpy-8.3.7-sdk\renpy\ast.py", line 2586, in execute
+    Say.execute(self)
+  File "C:\Users\Administrator\AppData\Local\Microsoft\WinGet\Packages\RenPy.RenPySDK_Microsoft.Winget.Source_8wekyb3d8bbwe\renpy-8.3.7-sdk\renpy\ast.py", line 583, in execute
+    who = eval_who(self.who, self.who_fast)
+  File "C:\Users\Administrator\AppData\Local\Microsoft\WinGet\Packages\RenPy.RenPySDK_Microsoft.Winget.Source_8wekyb3d8bbwe\renpy-8.3.7-sdk\renpy\ast.py", line 472, in eval_who
+    raise Exception("Sayer '%s' is not defined." % who)
+Exception: Sayer 'detective' is not defined.
+
+Windows-10-10.0.26100 AMD64
+Ren'Py 8.3.7.25031702
+迷雾庄园 0.3.0
+Sat May 23 19:44:55 2026
