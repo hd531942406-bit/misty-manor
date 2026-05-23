@@ -102,6 +102,28 @@ screen achievement_popup(ach_id):
             text get_ach_desc(ach_id) size 16 color "#8a7b6b"
 
 
+init python:
+    def achievement_scroll_warper(done):
+        done = max(0.0, min(1.0, done))
+        return 1.0 - (1.0 - done) ** 3
+
+    def smooth_achievement_scroll(adjustment, amount):
+        target = max(0, min(adjustment.range, adjustment.value + amount))
+        delta = target - adjustment.value
+        if delta:
+            adjustment.animate(delta, 0.22, achievement_scroll_warper)
+
+
+style achievement_scrollbar is vscrollbar:
+    xsize 10
+    base_bar Solid("#24202a")
+    thumb Solid("#d4a853")
+    hover_thumb Solid("#e8d5a3")
+    thumb_shadow None
+    thumb_offset 0
+    bar_resizing True
+
+
 # ═══════════════════════════════════════
 # 成就列表
 # ═══════════════════════════════════════
@@ -109,6 +131,11 @@ screen achievement_popup(ach_id):
 screen achievement_screen():
     tag menu
     modal True
+    default achievement_yadjustment = ui.adjustment(step=24)
+
+    key "viewport_wheelup" action Function(smooth_achievement_scroll, achievement_yadjustment, -64)
+    key "viewport_wheeldown" action Function(smooth_achievement_scroll, achievement_yadjustment, 64)
+
     add Solid("#0d0d12")
 
     textbutton "返回" action Return():
@@ -116,33 +143,49 @@ screen achievement_screen():
         text_size 22 text_color "#8a7b6b" text_hover_color "#d4a853"
 
     vbox:
-        xalign 0.5 ypos 60 spacing 25
+        xalign 0.5 ypos 36 spacing 16
         text "成 就" size 52 color "#d4a853" xalign 0.5
         text "已解锁 {color=#d4a853}[persistent.achievements.__len__()]{/color} / 10" size 22 color "#8a7b6b" xalign 0.5
-        null height 10
+        null height 4
 
-        viewport:
-            xalign 0.5 xsize 900 ysize 520 draggable True mousewheel True
-            vbox:
-                spacing 12
-                for ach_id, (name, desc) in sorted(ACHIEVEMENTS.items()):
-                    $ unlocked = ach_id in persistent.achievements
-                    frame:
-                        background Solid("#151520" if unlocked else "#0e0e15")
-                        padding (22, 14) xfill True
-                        hbox:
-                            vbox:
-                                text name size 24 color ("#e8d5a3" if unlocked else "#5a5a5a")
-                                text desc:
-                                    size 16
-                                    color ("#8a7b6b" if unlocked else "#4a4a4a")
-                                    xmaximum 700
-                            if unlocked:
-                                text "✦" size 32 color "#d4a853" xalign 1.0 yalign 0.5
-                            else:
-                                text "◇" size 28 color "#4a4a4a" xalign 1.0 yalign 0.5
+        hbox:
+            xalign 0.5
+            spacing 12
 
-        null height 10
+            viewport id "achievement_viewport":
+                xsize 900
+                ysize 440
+                yadjustment achievement_yadjustment
+                draggable True
+                mousewheel False
+                pagekeys True
+
+                vbox:
+                    spacing 12
+                    for ach_id, (name, desc) in sorted(ACHIEVEMENTS.items()):
+                        $ unlocked = ach_id in persistent.achievements
+                        frame:
+                            xsize 880
+                            background Solid("#151520" if unlocked else "#0e0e15")
+                            padding (22, 14)
+                            hbox:
+                                xfill True
+                                vbox:
+                                    xsize 760
+                                    text name size 24 color ("#e8d5a3" if unlocked else "#5a5a5a")
+                                    text desc:
+                                        size 16
+                                        color ("#8a7b6b" if unlocked else "#4a4a4a")
+                                        xmaximum 740
+                                if unlocked:
+                                    text "✦" size 32 color "#d4a853" yalign 0.5
+                                else:
+                                    text "◇" size 28 color "#4a4a4a" yalign 0.5
+
+            vbar value YScrollValue("achievement_viewport") style "achievement_scrollbar":
+                ysize 440
+
+        null height 6
         textbutton "返回":
             action Return()
             xalign 0.5 text_size 26
